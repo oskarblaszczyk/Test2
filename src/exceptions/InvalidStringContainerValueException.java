@@ -1,6 +1,6 @@
 package exceptions;
 
-public class InvalidStringContainerValueException extends RuntimeException{
+public class InvalidStringContainerValueException extends RuntimeException {
     public InvalidStringContainerValueException() {
     }
 

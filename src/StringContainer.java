@@ -1,6 +1,7 @@
 import exceptions.DuplicatedElementOnListException;
 import exceptions.InvalidStringContainerPatternException;
 import exceptions.InvalidStringContainerValueException;
+
 import java.io.*;
 import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
