@@ -1,9 +1,11 @@
 /*
-Zadanie01: napisz kod tak aby fragment ponizej dzialal i sie kompilowal. - ale nie mozesz uzywac tablic, list, setow, zadnych kolekcji czy kolejek, ani konkatenowac to w Stringi czy appendowac
+Zadanie01: napisz kod tak aby fragment ponizej dzialal i sie kompilowal. - ale nie mozesz uzywac tablic, list, setow, zadnych kolekcji czy kolejek,
+ani konkatenowac to w Stringi czy appendowac
         w string buildery
 
 //tworzymy klaske String container ktora bedzie mogla przyjmowac tylko Stringi z okreslonym Patternem podanym jako argument.
-//podczas tworzenia obiektu nalezy zdefinowac poprawnosc patternu i jesli pattern bedzie "zly- czyli taki ktory sie nie kompiluje" to ma zostac rzucony wyjatek InvalidStringContainerPatternException(badPattern)
+//podczas tworzenia obiektu nalezy zdefinowac poprawnosc patternu i jesli pattern bedzie "zly- czyli taki ktory sie nie kompiluje" to
+ ma zostac rzucony wyjatek InvalidStringContainerPatternException(badPattern)
 //wszystkie wyjatki w programie maja dziedziczyc RuntimeException.
 //tu w przykladzie dodajemy kody pocztowe
         StringContainer st = new StringContainer("\\d{2}[-]\\d{3}");
