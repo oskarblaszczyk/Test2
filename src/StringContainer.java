@@ -1,37 +1,3 @@
-/*
-Zadanie01: napisz kod tak aby fragment ponizej dzialal i sie kompilowal. - ale nie mozesz uzywac tablic, list, setow, zadnych kolekcji czy kolejek, ani konkatenowac to w Stringi czy appendowac
-        w string buildery
-
-//tworzymy klaske String container ktora bedzie mogla przyjmowac tylko Stringi z okreslonym Patternem podanym jako argument.
-//podczas tworzenia obiektu nalezy zdefinowac poprawnosc patternu i jesli pattern bedzie "zly- czyli taki ktory sie nie kompiluje" to ma zostac rzucony wyjatek InvalidStringContainerPatternException(badPattern)
-//wszystkie wyjatki w programie maja dziedziczyc RuntimeException.
-//tu w przykladzie dodajemy kody pocztowe
-        StringContainer st = new StringContainer("\\d{2}[-]\\d{3}");
-
-        st.add("02-495");//git
-        st.add("01-120");//git
-        st.add("05-123");//git
-        st.add("00-000");//git
-        //st.add("ala ma kota"); //powinno sie wywalic wyjatkiem InvalidStringContainerValueException(badValue)
-        for(int i=0; i<st.size(); i++){
-        System.out.println(st.get(i)); //powinno wypisac dodane kody pocztowe
-        }
-
-        st.remove(0);  //usuwa "02-495"
-        st.remove("00-000"); // usuwa "00-000"
-
-        System.out.println("po usunieciu");
-        for(int i=0; i<st.size(); i++){
-        System.out.println(st.get(i)); //powinno wypisac dodane kody pocztowe
-        }
-
-        nasza liste mozna tez parametryzowac tak aby nie dalo sie wrzucac powtorzen np:
-        StringContainer st = new StringContainer("\\d{2}[-]\\d{3}", true); //jakis parametr np: duplicatedNotAllowed - domyslnie false
-        wtedy np:
-        st.add("02-495");//git
-        st.add("02-495");//powinno rzucic wyjatkiem DuplicatedElementOnListException
- */
-
 import java.io.*;
 import java.util.regex.Pattern;
 
@@ -44,8 +10,8 @@ public class StringContainer {
     File tempFile = new File(".temp_" + file);
 
     /**
-     *Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
-     *Dozwolone są duplikaty.
+     * Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
+     * Dozwolone są duplikaty.
      */
     public StringContainer(String pattern) throws IOException {
         try {
@@ -59,8 +25,8 @@ public class StringContainer {
     }
 
     /**
-     *Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
-     *Duplikaty nie sa dozwolone.
+     * Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
+     * Duplikaty nie sa dozwolone.
      */
     public StringContainer(String pattern, boolean duplicatedNotAllowed) throws IOException {
         try {
@@ -74,23 +40,6 @@ public class StringContainer {
         createNewFile();
     }
 
-    /**
-     *Tworzy nowy pusty plik
-     */
-    private void createNewFile() throws IOException {
-        FileWriter fw = new FileWriter(file);
-        fw.write("");
-        fw.close();
-    }
-
-    /**
-     *Weryfikuje zgodnosc podanego String z Patternem
-     */
-    private void verifyString(String s) {
-        if (!Pattern.matches(pattern, s)) {
-            throw new RuntimeException("InvalidStringContainerValueException(badValue)");
-        }
-    }
 
     /**
      * Dodaje String zgodny z pattern do konca pliku (listy)
@@ -111,7 +60,7 @@ public class StringContainer {
      */
     public String get(int i) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
-        String str = "";
+        String str;
         int line = 0;
         while ((str = br.readLine()) != null) {
             if (line == i) {
@@ -130,7 +79,7 @@ public class StringContainer {
     public void remove(int i) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         FileWriter fw = new FileWriter(tempFile);
-        String str = "";
+        String str;
         int line = 0;
         while ((str = br.readLine()) != null) {
             if (line == i) {
@@ -163,7 +112,7 @@ public class StringContainer {
      */
     private int indexOf(String s) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
-        String str = "";
+        String str;
         int index = 0;
         while ((str = br.readLine()) != null) {
             if (str.equals(s)) {
@@ -174,6 +123,24 @@ public class StringContainer {
         }
         br.close();
         return -1;
+    }
+
+    /**
+     * Tworzy nowy pusty plik
+     */
+    private void createNewFile() throws IOException {
+        FileWriter fw = new FileWriter(file);
+        fw.write("");
+        fw.close();
+    }
+
+    /**
+     * Weryfikuje zgodnosc podanego String z Patternem
+     */
+    private void verifyString(String s) {
+        if (!Pattern.matches(pattern, s)) {
+            throw new RuntimeException("InvalidStringContainerValueException(badValue)");
+        }
     }
 
     /**
