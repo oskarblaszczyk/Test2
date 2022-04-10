@@ -3,11 +3,11 @@ import java.util.regex.Pattern;
 
 public class StringContainer {
     private final String pattern;
-    private boolean duplicatedNotAllowed = false;
+    private final boolean duplicatedNotAllowed;
     private int size = 0;
     private static int objectCounter = 0;
-    File file = new File("SC_" + objectCounter);
-    File tempFile = new File(".temp_" + file);
+    private final File file = new File("SC_" + objectCounter);
+    private final File tempFile = new File(".temp_" + file);
 
     /**
      * Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
@@ -20,6 +20,7 @@ public class StringContainer {
             throw new RuntimeException("InvalidStringContainerPatternException(badPattern)");
         }
         this.pattern = pattern;
+        duplicatedNotAllowed = false;
         objectCounter++;
         createNewFile();
     }
@@ -39,7 +40,6 @@ public class StringContainer {
         objectCounter++;
         createNewFile();
     }
-
 
     /**
      * Dodaje String zgodny z pattern do konca pliku (listy)
@@ -77,6 +77,9 @@ public class StringContainer {
      * Kasuje String o podanym indeksie
      */
     public void remove(int i) throws IOException {
+        if(i >= size){
+            throw new RuntimeException("IndexOutOfBoundException");
+        }
         BufferedReader br = new BufferedReader(new FileReader(file));
         FileWriter fw = new FileWriter(tempFile);
         String str;
@@ -95,12 +98,10 @@ public class StringContainer {
         tempFile.renameTo(file);
     }
 
-
     /**
      * Kasuje pierwszego znalezionego stringa z listy
      */
     public void remove(String s) throws IOException {
-        verifyString(s);
         if (indexOf(s) < 0) {
             throw new RuntimeException("StringContainerValueNotFound");
         }
@@ -111,6 +112,7 @@ public class StringContainer {
      * Zwraca index pierwszego znalezionego String'a
      */
     private int indexOf(String s) throws IOException {
+        verifyString(s);
         BufferedReader br = new BufferedReader(new FileReader(file));
         String str;
         int index = 0;
