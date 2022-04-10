@@ -32,22 +32,21 @@ Zadanie01: napisz kod tak aby fragment ponizej dzialal i sie kompilowal. - ale n
         st.add("02-495");//powinno rzucic wyjatkiem DuplicatedElementOnListException
  */
 
-
 import java.io.*;
-import java.nio.file.Files;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringContainer {
-    private String pattern;
-    private int size = 0;
-    private int objectIndex = 0;
+    private final String pattern;
     private boolean duplicatedNotAllowed = false;
-    File file = new File("file");
-    File file2 = new File("file2");
-    File tempFile = new File("file-r");
+    private int size = 0;
+    private static int objectCounter = 0;
+    File file = new File("SC_" + objectCounter);
+    File tempFile = new File(".temp_" + file);
 
-    // todo parametryzacja nazwy pliku!!!!!
+    /**
+     *Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
+     *Dozwolone są duplikaty.
+     */
     public StringContainer(String pattern) throws IOException {
         try {
             Pattern.compile(pattern);
@@ -55,10 +54,14 @@ public class StringContainer {
             throw new RuntimeException("InvalidStringContainerPatternException(badPattern)");
         }
         this.pattern = pattern;
+        objectCounter++;
         createNewFile();
-        objectIndex++;
     }
 
+    /**
+     *Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
+     *Duplikaty nie sa dozwolone.
+     */
     public StringContainer(String pattern, boolean duplicatedNotAllowed) throws IOException {
         try {
             Pattern.compile(pattern);
@@ -67,30 +70,52 @@ public class StringContainer {
         }
         this.pattern = pattern;
         this.duplicatedNotAllowed = duplicatedNotAllowed;
+        objectCounter++;
         createNewFile();
-        objectIndex++;
-
     }
 
+    /**
+     *Tworzy nowy pusty plik
+     */
     private void createNewFile() throws IOException {
-        FileWriter fw = new FileWriter(file2);
+        FileWriter fw = new FileWriter(file);
         fw.write("");
         fw.close();
     }
 
+    /**
+     *Weryfikuje zgodnosc podanego String z Patternem
+     */
+    private void verifyString(String s) {
+        if (!Pattern.matches(pattern, s)) {
+            throw new RuntimeException("InvalidStringContainerValueException(badValue)");
+        }
+    }
+
+    /**
+     * Dodaje String zgodny z pattern do konca pliku (listy)
+     */
     public void add(String s) throws IOException {
-        FileWriter fw = new FileWriter(file2, true);
+        if (duplicatedNotAllowed && indexOf(s) >= 0) {
+            throw new RuntimeException("DuplicatedElementOnListException");
+        }
+        verifyString(s);
+        FileWriter fw = new FileWriter(file, true);
         fw.write(s + "\n");
         fw.close();
         size++;
     }
 
+    /**
+     * Zwraca String o podanym indeksie
+     */
     public String get(int i) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(file2));
+        BufferedReader br = new BufferedReader(new FileReader(file));
         String str = "";
         int line = 0;
         while ((str = br.readLine()) != null) {
             if (line == i) {
+                br.close(); // pol dnia szukalem czemu mi nie chce pliku skasowac :D
                 return str;
             }
             line++;
@@ -99,129 +124,79 @@ public class StringContainer {
         return null;
     }
 
+    /**
+     * Kasuje String o podanym indeksie
+     */
     public void remove(int i) throws IOException {
-//        BufferedReader br = new BufferedReader(new FileReader(file2));
-//        FileWriter fw = new FileWriter(tempFile);
-//        String str = "";
-//        int line = 0;
-//        while ((str = br.readLine()) != null) {
-//            if (line == i) {
-//                size--;
-//            } else {
-//                fw.write(str + "\n");
-//            }
-//            line++;
-//
-//        }
-//        fw.close();
-//        br.close();
-
-        file2.delete();
-        Files.delete(file2.toPath());
-        tempFile.renameTo(file2);
-
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        FileWriter fw = new FileWriter(tempFile);
+        String str = "";
+        int line = 0;
+        while ((str = br.readLine()) != null) {
+            if (line == i) {
+                size--;
+            } else {
+                fw.write(str + "\n");
+            }
+            line++;
+        }
+        br.close();
+        fw.close();
+        file.delete();
+        tempFile.renameTo(file);
     }
-//    public void add(String s) throws IOException {
-//
-//        String str = Files.readString(file.toPath());
-//        FileWriter fw = new FileWriter("file", true);
-//        fw.write(createString(Integer.toString(size), s));
-//        fw.close();
-//        size++;
-//    }
-
-//     W metodzie ponizej uparlem sie aby dodawac '[' na poczatku i ']' na koncu jednak wyglada to slabo ale dziala :D
-
-//    public void add(String s) throws IOException {
-//        int index = 0;
-//        String str = readFile("file");
-//
-//        FileWriter fw = new FileWriter("file");
-//        fw.write("[");
-//
-//        if (str != null) {
-//            Pattern p = Pattern.compile(createString("\\d*", pattern));
-//            Matcher m = p.matcher(str);
-//
-//            while (m.find()) {
-//                fw.write(str.substring(m.start(), m.end()));
-//                index++;
-//            }
-//        }
-//
-//        fw.write(createString(Integer.toString(index), s));
-//        fw.write("]");
-//        fw.close();
-//        index++;
-//        size = index;
-//    }
-//    //todo konkatenuje tutaj w stringa, a nie mozna.
-//    private String createString(String index, String s) {
-//        return "{\"index\":" + index + ",\"String\":\"" + s + "\"}";
-//    }
-//
-//    public String get(int i) throws IOException {
-//        String str = Files.readString(file.toPath());
-//        Pattern p = Pattern.compile("\\" + (createString(Integer.toString(i), pattern))); //todo sprawdzic \\ czemu createString
-//        Matcher m = p.matcher(str);
-//        if (m.find()) {
-//            return str.substring(m.end() - 8, m.end() - 2);
-//        }
-//        return null;
-//    }
-//     public void print() throws IOException {
-//         System.out.println(Files.readString(file.toPath()));
-//     }
-
-//    public void remove(int i) throws IOException {
-//        int count = 0;
-//        String str = Files.readString(file.toPath());
-//        FileWriter fw = new FileWriter(tempFile);
-//        for (int j = 0; j < size; j++) {
-//            if (j == i) {
-//                continue;
-//            }
-//            fw.write(createString(Integer.toString(count), get(j)));
-//            count++;
-//        }
-//        fw.close();
-//        file.delete();
-//        tempFile.renameTo(file);
-//
-//        size = count;
-//    }
 
 
-//    public String get(String s) throws IOException {
-//        BufferedReader br = new BufferedReader(new FileReader("file"));
-//        String str = br.readLine();
-//        while (p1.matcher(str).find()) {
-//            if (s.equals(str.substring(p1.matcher(str).start(), p1.matcher(str).end()))) {
-//                return str.substring(p1.matcher(str).start(), p1.matcher(str).end());
-//            }
-//        }
-//        return null;
-//    }
+    /**
+     * Kasuje pierwszego znalezionego stringa z listy
+     */
+    public void remove(String s) throws IOException {
+        verifyString(s);
+        if (indexOf(s) < 0) {
+            throw new RuntimeException("StringContainerValueNotFound");
+        }
+        remove(indexOf(s));
+    }
 
+    /**
+     * Zwraca index pierwszego znalezionego String'a
+     */
+    private int indexOf(String s) throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        String str = "";
+        int index = 0;
+        while ((str = br.readLine()) != null) {
+            if (str.equals(s)) {
+                br.close();
+                return index;
+            }
+            index++;
+        }
+        br.close();
+        return -1;
+    }
+
+    /**
+     * Zwraca ilosc dodanych elementow
+     */
     public int size() {
         return size;
     }
 
-//    private String readFile(String file) throws IOException {
-//        BufferedReader br = new BufferedReader(new FileReader(file));
-//        String str = br.readLine();
-//        return str;
-//    }
+    public String getPattern() {
+        return pattern;
+    }
 
-
-//    public String getPattern() {
-//        return pattern;
-//    }
+    public boolean isDuplicatedNotAllowed() {
+        return duplicatedNotAllowed;
+    }
 
     @Override
     public String toString() {
-        return "StringContainer{" +
-                "pattern='" + '\'' +
-                '}';
+        return "StringContainer numer:" +
+                objectCounter +
+                " pattern: '" +
+                pattern;
+
     }
 }
