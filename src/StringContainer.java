@@ -1,3 +1,6 @@
+import exceptions.DuplicatedElementOnListException;
+import exceptions.InvalidStringContainerPatternException;
+import exceptions.InvalidStringContainerValueException;
 import java.io.*;
 import java.util.regex.Pattern;
 
@@ -14,11 +17,7 @@ public class StringContainer {
      * Dozwolone są duplikaty.
      */
     public StringContainer(String pattern) throws IOException {
-        try {
-            Pattern.compile(pattern);
-        } catch (Exception exception) {
-            throw new RuntimeException("InvalidStringContainerPatternException(badPattern)");
-        }
+        verifyPattern(pattern);
         this.pattern = pattern;
         duplicatedNotAllowed = false;
         objectCounter++;
@@ -30,11 +29,7 @@ public class StringContainer {
      * Duplikaty nie sa dozwolone.
      */
     public StringContainer(String pattern, boolean duplicatedNotAllowed) throws IOException {
-        try {
-            Pattern.compile(pattern);
-        } catch (Exception exception) {
-            throw new RuntimeException("InvalidStringContainerPatternException(badPattern)");
-        }
+        verifyPattern(pattern);
         this.pattern = pattern;
         this.duplicatedNotAllowed = duplicatedNotAllowed;
         objectCounter++;
@@ -46,7 +41,7 @@ public class StringContainer {
      */
     public void add(String s) throws IOException {
         if (duplicatedNotAllowed && indexOf(s) >= 0) {
-            throw new RuntimeException("DuplicatedElementOnListException");
+            throw new DuplicatedElementOnListException();
         }
         verifyString(s);
         FileWriter fw = new FileWriter(file, true);
@@ -59,6 +54,9 @@ public class StringContainer {
      * Zwraca String o podanym indeksie
      */
     public String get(int i) throws IOException {
+        if (i >= size || i < 0) {
+            throw new IndexOutOfBoundsException();
+        }
         BufferedReader br = new BufferedReader(new FileReader(file));
         String str;
         int line = 0;
@@ -77,8 +75,8 @@ public class StringContainer {
      * Kasuje String o podanym indeksie
      */
     public void remove(int i) throws IOException {
-        if(i >= size){
-            throw new RuntimeException("IndexOutOfBoundException");
+        if (i >= size || i < 0) {
+            throw new IndexOutOfBoundsException();
         }
         BufferedReader br = new BufferedReader(new FileReader(file));
         FileWriter fw = new FileWriter(tempFile);
@@ -109,7 +107,8 @@ public class StringContainer {
     }
 
     /**
-     * Zwraca index pierwszego znalezionego String'a
+     * Zwraca index pierwszego znalezionego String'a.
+     * Jezeli nie istnieje to zwraca -1
      */
     private int indexOf(String s) throws IOException {
         verifyString(s);
@@ -128,7 +127,7 @@ public class StringContainer {
     }
 
     /**
-     * Tworzy nowy pusty plik
+     * Tworzy nowy pusty plik lub nadpisuje istniejacy.
      */
     private void createNewFile() throws IOException {
         FileWriter fw = new FileWriter(file);
@@ -141,7 +140,18 @@ public class StringContainer {
      */
     private void verifyString(String s) {
         if (!Pattern.matches(pattern, s)) {
-            throw new RuntimeException("InvalidStringContainerValueException(badValue)");
+            throw new InvalidStringContainerValueException("badValue");
+        }
+    }
+
+    /**
+     * Weryfikuje czy pattern się kompiluje
+     */
+    private void verifyPattern(String s) {
+        try {
+            Pattern.compile(s);
+        } catch (Exception exception) {
+            throw new InvalidStringContainerPatternException("badPattern");
         }
     }
 
