@@ -2,6 +2,7 @@ import exceptions.DuplicatedElementOnListException;
 import exceptions.InvalidStringContainerPatternException;
 import exceptions.InvalidStringContainerValueException;
 import java.io.*;
+import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 
 public class StringContainer {
@@ -26,7 +27,7 @@ public class StringContainer {
 
     /**
      * Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
-     * Duplikaty nie sa dozwolone.
+     * Duplikaty moga byc niedozwolone.
      */
     public StringContainer(String pattern, boolean duplicatedNotAllowed) throws IOException {
         verifyPattern(pattern);
@@ -101,7 +102,7 @@ public class StringContainer {
      */
     public void remove(String s) throws IOException {
         if (indexOf(s) < 0) {
-            throw new RuntimeException("StringContainerValueNotFound");
+            throw new NoSuchElementException();
         }
         remove(indexOf(s));
     }
