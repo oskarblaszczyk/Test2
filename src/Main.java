@@ -1,5 +1,3 @@
-import java.io.IOException;
-
 public class Main {
     public static void main(String[] args) {
         StringContainer st = new StringContainer("\\d{2}[-]\\d{3}");

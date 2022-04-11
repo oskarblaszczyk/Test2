@@ -92,6 +92,8 @@ public class StringContainer {
 
     }
 
+    //lepiej zostawic void czy zwracac boolean?
+
     /**
      * Kasuje pierwszy zgodny String(obiekt listy)
      *
@@ -100,16 +102,16 @@ public class StringContainer {
     private void removeNode(StringNode node) {
         StringNode first = firstNode;
         if (node.equals(first)) {
-            firstNode = first.getNextNode();
+            firstNode = first.nextNode;
             size--;
         } else {
-            while (first.getNextNode() != null) {
-                if (node.equals(first.getNextNode())) {
-                    first.setNextNode(first.getNextNode().getNextNode());
+            while (first.nextNode != null) {
+                if (node.equals(first.nextNode)) {
+                    first.nextNode = first.nextNode.nextNode;
                     size--;
                     break;
                 }
-                first = first.getNextNode();
+                first = first.nextNode;
             }
         }
     }
@@ -124,10 +126,10 @@ public class StringContainer {
     private StringNode getNode(String str) {
         StringNode node = firstNode;
         while (node != null) {
-            if (node.getName().equals(str)) {
+            if (node.name.equals(str)) {
                 return node;
             }
-            node = node.getNextNode();
+            node = node.nextNode;
         }
         throw new NoSuchElementException(str);
     }
@@ -177,14 +179,15 @@ public class StringContainer {
     private boolean isDuplicated(String s) {
         StringNode node = firstNode;
         while (node != null) {
-            if (node.getName().equals(s)) {
+            if (node.name.equals(s)) {
                 return true;
             }
-            node = node.getNextNode();
+            node = node.nextNode;
         }
         return false;
     }
 
+    //te dwa gettery nie są potrzebne dla tej tresci zadania ale akurat one moga sie przydac.
     public String getPattern() {
         return pattern;
     }
@@ -204,19 +207,6 @@ public class StringContainer {
         public StringNode(String name) {
             this.name = name;
             this.nextNode = null;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-
-        public StringNode getNextNode() {
-            return nextNode;
-        }
-
-        public void setNextNode(StringNode nextNode) {
-            this.nextNode = nextNode;
         }
 
         @Override
