@@ -5,7 +5,7 @@ public class InvalidStringContainerPatternException extends RuntimeException {
     }
 
     public InvalidStringContainerPatternException(String message) {
-        super(message);
+        super("bad pattern: " + message);
     }
 
     public InvalidStringContainerPatternException(String message, Throwable cause) {

@@ -1,140 +1,151 @@
-import exceptions.DuplicatedElementOnListException;
-import exceptions.InvalidStringContainerPatternException;
-import exceptions.InvalidStringContainerValueException;
+import exceptions.*;
 
-import java.io.*;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class StringContainer {
     private final String pattern;
     private final boolean duplicatedNotAllowed;
     private int size = 0;
-    private static int objectCounter = 0;
-    private final File file = new File("SC_" + objectCounter);
-    private final File tempFile = new File(".temp_" + file);
+    private StringNode firstNode;
 
-    /**
-     * Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
-     * Dozwolone są duplikaty.
-     */
-    public StringContainer(String pattern) throws IOException {
+    public StringContainer(String pattern) {
         verifyPattern(pattern);
         this.pattern = pattern;
         duplicatedNotAllowed = false;
-        objectCounter++;
-        createNewFile();
+        firstNode = null;
     }
 
-    /**
-     * Konstruuje obiekt przechowujacy Stringi zgodne z podanym patternem.
-     * Duplikaty moga byc niedozwolone.
-     */
-    public StringContainer(String pattern, boolean duplicatedNotAllowed) throws IOException {
+    public StringContainer(String pattern, boolean duplicatedNotAllowed) {
         verifyPattern(pattern);
         this.pattern = pattern;
         this.duplicatedNotAllowed = duplicatedNotAllowed;
-        objectCounter++;
-        createNewFile();
     }
 
     /**
-     * Dodaje String zgodny z pattern do konca pliku (listy)
+     * Dodaje String na koncu listy.
+     *
+     * @param str zgodny z pattern.
      */
-    public void add(String s) throws IOException {
-        if (duplicatedNotAllowed && indexOf(s) >= 0) {
-            throw new DuplicatedElementOnListException();
+    public void add(String str) {
+        verifyString(str);
+        if (duplicatedNotAllowed && isDuplicated(str)) {
+            throw new DuplicatedElementOnListException(str);
         }
-        verifyString(s);
-        FileWriter fw = new FileWriter(file, true);
-        fw.write(s + "\n");
-        fw.close();
+
+        if (firstNode == null) {
+            firstNode = new StringNode(str);
+        } else {
+            StringNode node = firstNode;
+            while (node.nextNode != null) {
+                node = node.nextNode;
+            }
+            node.nextNode = new StringNode(str);
+        }
         size++;
     }
 
     /**
-     * Zwraca String o podanym indeksie
+     * Zwraca String z obiektu listy o podanym indeksie.
+     * jezeli podany index poza zakresem -> wyjatek
+     *
+     * @param index indeks obiektu do pobrania String
+     * @return wartosc String
      */
-    public String get(int i) throws IOException {
-        if (i >= size || i < 0) {
-            throw new IndexOutOfBoundsException();
+    public String get(int index) {
+        if (index >= size || index < 0) {
+            throw new IndexOutOfBoundsException(index);
         }
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String str;
-        int line = 0;
-        while ((str = br.readLine()) != null) {
-            if (line == i) {
-                br.close(); // pol dnia szukalem czemu mi nie chce pliku skasowac :D
-                return str;
+        return getNode(index).name;
+    }
+
+    /**
+     * Kasuje String o podanym indeksie.
+     * Jezeli indeks poza zakresem -> wyjatek
+     *
+     * @param index kasowany String
+     */
+    public void remove(int index) {
+        if (index >= size || index < 0) {
+            throw new IndexOutOfBoundsException(index);
+        }
+        removeNode(getNode(index));
+    }
+
+    /**
+     * Kasuje pierwszy zgodny String
+     * Jezeli brak podanego na liscie -> wyjatek
+     *
+     * @param str kasowany String zgodny z pattern
+     */
+    public void remove(String str) {
+        verifyString(str);
+        removeNode(getNode(str));
+    }
+
+    /**
+     * Zwraca ilosc elementow w Liscie
+     */
+    public int size() {
+        return size;
+
+    }
+
+    /**
+     * Kasuje pierwszy zgodny String(obiekt listy)
+     *
+     * @param node obiekt do skasowania
+     */
+    private void removeNode(StringNode node) {
+        StringNode first = firstNode;
+        if (node.equals(first)) {
+            firstNode = first.getNextNode();
+            size--;
+        } else {
+            while (first.getNextNode() != null) {
+                if (node.equals(first.getNextNode())) {
+                    first.setNextNode(first.getNextNode().getNextNode());
+                    size--;
+                    break;
+                }
+                first = first.getNextNode();
             }
-            line++;
         }
-        br.close();
-        return null;
     }
 
     /**
-     * Kasuje String o podanym indeksie
+     * Zwraca pierwszy znaleziony obiekt String
+     * Jezeli nie znaleziono rzuca wyjatek.
+     *
+     * @param str String zgodny z pattern
+     * @return obiekt String
      */
-    public void remove(int i) throws IOException {
-        if (i >= size || i < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        FileWriter fw = new FileWriter(tempFile);
-        String str;
-        int line = 0;
-        while ((str = br.readLine()) != null) {
-            if (line == i) {
-                size--;
-            } else {
-                fw.write(str + "\n");
+    private StringNode getNode(String str) {
+        StringNode node = firstNode;
+        while (node != null) {
+            if (node.getName().equals(str)) {
+                return node;
             }
-            line++;
+            node = node.getNextNode();
         }
-        br.close();
-        fw.close();
-        file.delete();
-        tempFile.renameTo(file);
+        throw new NoSuchElementException(str);
     }
 
     /**
-     * Kasuje pierwszego znalezionego stringa z listy
+     * Zwraca obiekt String o podanym indeksie
+     *
+     * @param index indeks Obiektu String
+     * @return obiekt String
      */
-    public void remove(String s) throws IOException {
-        if (indexOf(s) < 0) {
-            throw new NoSuchElementException();
-        }
-        remove(indexOf(s));
-    }
-
-    /**
-     * Zwraca index pierwszego znalezionego String'a.
-     * Jezeli nie istnieje to zwraca -1
-     */
-    private int indexOf(String s) throws IOException {
-        verifyString(s);
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String str;
-        int index = 0;
-        while ((str = br.readLine()) != null) {
-            if (str.equals(s)) {
-                br.close();
-                return index;
+    private StringNode getNode(int index) {
+        StringNode node = firstNode;
+        if (index != 0) {
+            for (int i = 1; i <= index; i++) {
+                node = node.nextNode;
             }
-            index++;
         }
-        br.close();
-        return -1;
-    }
-
-    /**
-     * Tworzy nowy pusty plik lub nadpisuje istniejacy.
-     */
-    private void createNewFile() throws IOException {
-        FileWriter fw = new FileWriter(file);
-        fw.write("");
-        fw.close();
+        return node;
     }
 
     /**
@@ -142,7 +153,7 @@ public class StringContainer {
      */
     private void verifyString(String s) {
         if (!Pattern.matches(pattern, s)) {
-            throw new InvalidStringContainerValueException("badValue");
+            throw new InvalidStringContainerValueException(s);
         }
     }
 
@@ -153,15 +164,25 @@ public class StringContainer {
         try {
             Pattern.compile(s);
         } catch (Exception exception) {
-            throw new InvalidStringContainerPatternException("badPattern");
+            throw new InvalidStringContainerPatternException(s);
         }
     }
 
     /**
-     * Zwraca ilosc dodanych elementow
+     * Sprawdza czy podany String wystepuje w jakimkolwiek elemencie
+     *
+     * @param s String do sprawdzenia
+     * @return true jesli wystepuje
      */
-    public int size() {
-        return size;
+    private boolean isDuplicated(String s) {
+        StringNode node = firstNode;
+        while (node != null) {
+            if (node.getName().equals(s)) {
+                return true;
+            }
+            node = node.getNextNode();
+        }
+        return false;
     }
 
     public String getPattern() {
@@ -172,12 +193,44 @@ public class StringContainer {
         return duplicatedNotAllowed;
     }
 
-    @Override
-    public String toString() {
-        return "StringContainer numer:" +
-                objectCounter +
-                " pattern: '" +
-                pattern;
+    /**
+     * Klasa wewnetrzna definijuca elementy.
+     * Kazdy element posiada wskazany kolejny.
+     */
+    private static class StringNode {
+        private final String name;
+        private StringNode nextNode;
 
+        public StringNode(String name) {
+            this.name = name;
+            this.nextNode = null;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+
+        public StringNode getNextNode() {
+            return nextNode;
+        }
+
+        public void setNextNode(StringNode nextNode) {
+            this.nextNode = nextNode;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            StringNode that = (StringNode) o;
+            return Objects.equals(name, that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
     }
+
 }

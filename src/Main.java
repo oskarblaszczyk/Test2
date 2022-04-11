@@ -1,7 +1,7 @@
 import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         StringContainer st = new StringContainer("\\d{2}[-]\\d{3}");
 
         st.add("02-495");//git
@@ -20,7 +20,6 @@ public class Main {
         for (int i = 0; i < st.size(); i++) {
             System.out.println(st.get(i)); //powinno wypisac dodane kody pocztowe
         }
-
 
         StringContainer st1 = new StringContainer("\\d{2}[-]\\d{3}", true);
         st1.add("02-495");  //git

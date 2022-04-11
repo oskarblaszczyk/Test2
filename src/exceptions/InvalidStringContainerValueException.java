@@ -5,7 +5,7 @@ public class InvalidStringContainerValueException extends RuntimeException {
     }
 
     public InvalidStringContainerValueException(String message) {
-        super(message);
+        super("bad value: " + message);
     }
 
     public InvalidStringContainerValueException(String message, Throwable cause) {
